@@ -1,15 +1,16 @@
-// -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2020 MIT, All rights reserved
-// Released under the Apache License, Version 2.0
-// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
-import static com.google.appinventor.components.runtime.util.PaintUtil.hexStringToInt;
+
+import com.google.appinventor.components.runtime.collect.Lists;
+import com.google.appinventor.components.runtime.collect.Maps;
+import com.google.appinventor.components.runtime.collect.Sets;
+import com.google.appinventor.components.runtime.errors.PermissionException;
+import com.google.appinventor.components.runtime.multidex.MultiDex;
+import com.google.appinventor.components.runtime.util.*;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -46,46 +47,9 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.appinventor.common.version.AppInventorFeatures;
-
-import com.google.appinventor.components.annotations.Asset;
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.IsColor;
-import com.google.appinventor.components.annotations.Options;
-import com.google.appinventor.components.annotations.PropertyCategory;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleFunction;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesPermissions;
-import com.google.appinventor.components.common.ComponentCategory;
-import com.google.appinventor.components.common.ComponentConstants;
-import com.google.appinventor.components.common.FileScope;
-import com.google.appinventor.components.common.HorizontalAlignment;
-import com.google.appinventor.components.common.Permission;
-import com.google.appinventor.components.common.PropertyTypeConstants;
-import com.google.appinventor.components.common.ScreenAnimation;
-import com.google.appinventor.components.common.ScreenOrientation;
-import com.google.appinventor.components.common.VerticalAlignment;
-import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.collect.Lists;
-import com.google.appinventor.components.runtime.collect.Maps;
-import com.google.appinventor.components.runtime.collect.Sets;
-import com.google.appinventor.components.runtime.errors.PermissionException;
-import com.google.appinventor.components.runtime.multidex.MultiDex;
-import com.google.appinventor.components.runtime.util.AlignmentUtil;
-import com.google.appinventor.components.runtime.util.AnimationUtil;
-import com.google.appinventor.components.runtime.util.BulkPermissionRequest;
-import com.google.appinventor.components.runtime.util.ErrorMessages;
-import com.google.appinventor.components.runtime.util.FileUtil;
-import com.google.appinventor.components.runtime.util.FullScreenVideoUtil;
-import com.google.appinventor.components.runtime.util.JsonUtil;
-import com.google.appinventor.components.runtime.util.MediaUtil;
-import com.google.appinventor.components.runtime.util.OnInitializeListener;
-import com.google.appinventor.components.runtime.util.ScreenDensityUtil;
-import com.google.appinventor.components.runtime.util.SdkLevel;
-import com.google.appinventor.components.runtime.util.ViewUtil;
+import com.google.appinventor.common.version.*;
+import com.google.appinventor.components.annotations.*;
+import com.google.appinventor.components.common.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -146,11 +110,11 @@ public class Form extends AppInventorCompatActivity
   public static final String ASSETS_PREFIX = "file:///android_asset/";
 
   private static final int DEFAULT_PRIMARY_COLOR_DARK =
-      hexStringToInt(ComponentConstants.DEFAULT_PRIMARY_DARK_COLOR);
+      PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_PRIMARY_DARK_COLOR);
   private static final int DEFAULT_ACCENT_COLOR =
-      hexStringToInt(ComponentConstants.DEFAULT_ACCENT_COLOR);
+      PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_ACCENT_COLOR);
 
-  private List<Component> allChildren = new ArrayList<>();
+  private final List<Component> allChildren = new ArrayList<>();
 
   // Keep track of the current form object.
   // activeForm always holds the Form that is currently handling event dispatching so runtime.scm
@@ -205,8 +169,6 @@ public class Form extends AppInventorCompatActivity
   private ScreenAnimation openAnimType = ScreenAnimation.Default;
   private ScreenAnimation closeAnimType = ScreenAnimation.Default;
 
-  // Syle information
-  private int primaryColor = DEFAULT_PRIMARY_COLOR;
   private int primaryColorDark = DEFAULT_PRIMARY_COLOR_DARK;
   private int accentColor = DEFAULT_ACCENT_COLOR;
 
@@ -253,7 +215,7 @@ public class Form extends AppInventorCompatActivity
   protected String startupValue = "";
 
   // To control volume of error complaints
-  private static long minimumToastWait = 10000000000L; // 10 seconds
+  private static final long minimumToastWait = 10000000000L; // 10 seconds
   private long lastToastTime = System.nanoTime() - minimumToastWait;
 
   // In a multiple screen application, when a secondary screen is opened, nextFormName is set to
@@ -293,7 +255,7 @@ public class Form extends AppInventorCompatActivity
     Dim dim;
   }
   // private ArrayList<PercentStorageRecord> dimChanges = new ArrayList();
-  private LinkedHashMap<Integer, PercentStorageRecord> dimChanges = new LinkedHashMap();
+  private final LinkedHashMap<Integer, PercentStorageRecord> dimChanges = new LinkedHashMap();
 
   private static class MultiDexInstaller extends AsyncTask<Form, Void, Boolean> {
     Form ourForm;
@@ -1620,6 +1582,11 @@ public class Form extends AppInventorCompatActivity
       actionBarEnabled = enabled;
     }
   }
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
+  @SimpleProperty(userVisible = false)  //Since displayed only on Screen1, don't make this visible
+  public void PkgName(String applicationPackage) {
+    // We don't actually need to do anything.
+  }
 
   /**
   * Returns a number that encodes how contents of the screen are aligned horizontally.
@@ -2004,7 +1971,8 @@ public class Form extends AppInventorCompatActivity
   @SimpleProperty
   @IsColor
   public int PrimaryColor() {
-    return primaryColor;
+    // Syle information
+    return Integer.parseInt(ComponentConstants.DEFAULT_PRIMARY_COLOR);
   }
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
@@ -2073,15 +2041,20 @@ public class Form extends AppInventorCompatActivity
       setBackground(frameLayout);
     }
     usesDarkTheme = false;
-    if (theme.equals("Classic")) {
-      setAppInventorTheme(Theme.CLASSIC);
-    } else if (theme.equals("AppTheme.Light.DarkActionBar")) {
-      setAppInventorTheme(Theme.DEVICE_DEFAULT);
-    } else if (theme.equals("AppTheme.Light")) {
-      setAppInventorTheme(Theme.BLACK_TITLE_TEXT);
-    } else if (theme.equals("AppTheme")) {
-      usesDarkTheme = true;
-      setAppInventorTheme(Theme.DARK);
+    switch (theme) {
+      case "Classic":
+        setAppInventorTheme(Theme.CLASSIC);
+        break;
+      case "AppTheme.Light.DarkActionBar":
+        setAppInventorTheme(Theme.DEVICE_DEFAULT);
+        break;
+      case "AppTheme.Light":
+        setAppInventorTheme(Theme.BLACK_TITLE_TEXT);
+        break;
+      case "AppTheme":
+        usesDarkTheme = true;
+        setAppInventorTheme(Theme.DARK);
+        break;
     }
   }
 
@@ -2195,10 +2168,11 @@ public class Form extends AppInventorCompatActivity
   // This JSON encodes the startup value
   protected void startNewForm(String nextFormName, Object startupValue) {
     Log.i(LOG_TAG, "startNewForm:" + nextFormName);
-    Intent activityIntent = new Intent();
+    Intent activityIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+    activityIntent.setClassName(this,activityIntent.getComponent().getClassName().replace("Screen1",nextFormName));
     // Note that the following is dependent on form generated class names being the same as
     // their form names and all forms being in the same package.
-    activityIntent.setClassName(this, getPackageName() + "." + nextFormName);
+    //activityIntent.setClassName(this, getPackageName() + "." + nextFormName);
     String functionName = (startupValue == null) ? "open another screen" :
       "open another screen with start value";
     String jValue;
@@ -2867,7 +2841,7 @@ public class Form extends AppInventorCompatActivity
 
   @Override
   public void onRequestPermissionsResult(int requestCode,
-    String permissions[], int[] grantResults) {
+                                         String[] permissions, int[] grantResults) {
     PermissionResultHandler responder = permissionHandlers.get(requestCode);
     if (responder == null) {
       // Hmm. Shouldn't happen
@@ -2875,11 +2849,7 @@ public class Form extends AppInventorCompatActivity
       return;
     }
     if (grantResults.length > 0) {
-      if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        responder.HandlePermissionResponse(permissions[0], true);
-      } else {
-        responder.HandlePermissionResponse(permissions[0], false);
-      }
+      responder.HandlePermissionResponse(permissions[0], grantResults[0] == PackageManager.PERMISSION_GRANTED);
     } else {
       Log.d(LOG_TAG, "onRequestPermissionsResult: grantResults.length = " + grantResults.length +
         " requestCode = " + requestCode);

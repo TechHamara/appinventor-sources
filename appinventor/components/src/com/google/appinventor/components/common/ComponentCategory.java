@@ -1,9 +1,3 @@
-// -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2017 MIT, All rights reserved
-// Released under the Apache License, Version 2.0
-// http://www.apache.org/licenses/LICENSE-2.0
-
 package com.google.appinventor.components.common;
 
 import java.util.HashMap;
@@ -12,38 +6,6 @@ import java.util.Map;
 /**
  * Categories for grouping components in the palette within the Designer.
  */
-//public enum ComponentCategory {
-//  // TODO(user): i18n category names
-//  USERINTERFACE(MESSAGES.UIComponentPallette()),
-//  LAYOUT(MESSAGES.layoutComponentPallette()),
-//  MEDIA(MESSAGES.mediaComponentPallette()),
-//  ANIMATION(MESSAGES.drawanimationComponentPallette()),
-//  SENSORS(MESSAGES.sensorsComponentPallette()),
-//  SOCIAL(MESSAGES.socialComponentPallette()),
-//  STORAGE(MESSAGES.storageComponentPallette()),
-//  CONNECTIVITY(MESSAGES.connectivityComponentPallette()),
-//  LEGOMINDSTORMS(MESSAGES.legoComponentPallette()),
-//  //EXPERIMENTAL(MESSAGES.experimentalComponentPallette()),
-//  INTERNAL(MESSAGES.internalUseComponentPallette()),
-//  // UNINITIALIZED is used as a default value so Swing libraries can still compile
-//  UNINITIALIZED(MESSAGES.uninitializedComponentPallette());
-//
-//
-//  // Mapping of component categories to names consisting only of lower-case letters,
-//  // suitable for appearing in URLs.
-//  private static final Map<String, String> DOC_MAP = new HashMap<String, String>();
-//  static {
-//    DOC_MAP.put(MESSAGES.UIComponentPallette(), "userinterface");
-//    DOC_MAP.put(MESSAGES.layoutComponentPallette(), "layout");
-//    DOC_MAP.put(MESSAGES.mediaComponentPallette(), "media");
-//    DOC_MAP.put(MESSAGES.drawanimationComponentPallette(), "animation");
-//    DOC_MAP.put(MESSAGES.sensorsComponentPallette(), "sensors");
-//    DOC_MAP.put(MESSAGES.socialComponentPallette(), "social");
-//    DOC_MAP.put(MESSAGES.storageComponentPallette(), "storage");
-//    DOC_MAP.put(MESSAGES.connectivityComponentPallette(), "connectivity");
-//    DOC_MAP.put(MESSAGES.legoComponentPallette(), "legomindstorms");
-//    //DOC_MAP.put(MESSAGES.experimentalComponentPallette(), "experimental");
-//  }
 
   public enum ComponentCategory {
     // TODO(user): i18n category names
@@ -83,7 +45,7 @@ import java.util.Map;
     }
 
 
-    private String name;
+    private final String name;
 
   private ComponentCategory(String categoryName) {
     name = categoryName;

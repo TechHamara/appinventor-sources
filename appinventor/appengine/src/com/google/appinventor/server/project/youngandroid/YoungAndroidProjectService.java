@@ -1,58 +1,35 @@
-// -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2017 MIT, All rights reserved
-// Released under the Apache License, Version 2.0
-// http://www.apache.org/licenses/LICENSE-2.0
-
 package com.google.appinventor.server.project.youngandroid;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
-import com.google.appinventor.common.utils.StringUtils;
-import com.google.appinventor.common.version.GitBuildId;
-import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.server.CrashReport;
-import com.google.appinventor.server.FileExporter;
-import com.google.appinventor.server.FileExporterImpl;
-import com.google.appinventor.server.FileImporter;
-import com.google.appinventor.server.FileImporterException;
-import com.google.appinventor.server.FileImporterImpl;
-import com.google.appinventor.server.Server;
-import com.google.appinventor.server.encryption.EncryptionException;
-import com.google.appinventor.server.flags.Flag;
-import com.google.appinventor.server.project.CommonProjectService;
-import com.google.appinventor.server.project.utils.Security;
-import com.google.appinventor.server.properties.json.ServerJsonParser;
-import com.google.appinventor.server.storage.StorageIo;
-import com.google.appinventor.server.util.UriBuilder;
-import com.google.appinventor.shared.properties.json.JSONParser;
-import com.google.appinventor.shared.rpc.RpcResult;
-import com.google.appinventor.shared.rpc.ServerLayout;
-import com.google.appinventor.shared.rpc.project.NewProjectParameters;
-import com.google.appinventor.shared.rpc.project.Project;
-import com.google.appinventor.shared.rpc.project.ProjectNode;
-import com.google.appinventor.shared.rpc.project.ProjectRootNode;
-import com.google.appinventor.shared.rpc.project.ProjectSourceZip;
-import com.google.appinventor.shared.rpc.project.RawFile;
-import com.google.appinventor.shared.rpc.project.TextFile;
-import com.google.appinventor.shared.rpc.project.UserProject;
-import com.google.appinventor.shared.rpc.project.youngandroid.NewYoungAndroidProjectParameters;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidComponentNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidComponentsFolder;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceFolderNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidYailNode;
-import com.google.appinventor.shared.rpc.user.User;
-import com.google.appinventor.shared.settings.Settings;
+import com.google.appinventor.common.utils.*;
+import com.google.appinventor.common.version.*;
+import com.google.appinventor.components.common.*;
+import com.google.appinventor.server.*;
+import com.google.appinventor.server.encryption.*;
+import com.google.appinventor.server.flags.*;
+import com.google.appinventor.server.project.*;
+import com.google.appinventor.server.project.utils.*;
+import com.google.appinventor.server.properties.json.*;
+import com.google.appinventor.server.storage.*;
+import com.google.appinventor.server.util.*;
+import com.google.appinventor.shared.properties.json.*;
+import com.google.appinventor.shared.rpc.*;
+import com.google.appinventor.shared.rpc.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.*;
+import com.google.appinventor.shared.rpc.project.youngandroid.*;
+import com.google.appinventor.shared.rpc.user.*;
+import com.google.appinventor.shared.settings.*;
 import com.google.appinventor.shared.settings.SettingsConstants;
-import com.google.appinventor.shared.storage.StorageUtil;
-import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+import com.google.appinventor.shared.storage.*;
+import com.google.appinventor.shared.youngandroid.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -87,7 +64,7 @@ import java.util.logging.Logger;
  * @author lizlooney@google.com (Liz Looney)
  * @author markf@google.com (Mark Friedman)
  */
-public final class YoungAndroidProjectService extends CommonProjectService {
+public final class YoungAndroidProjectService extends CommonProjectService{
 
   private static final Logger LOG = Logger.getLogger(YoungAndroidProjectService.class.getName());
   private static final int MB = 1024 * 1024;
@@ -152,9 +129,10 @@ public final class YoungAndroidProjectService extends CommonProjectService {
    */
   @VisibleForTesting
   public static String getInitialFormPropertiesFileContents(String qualifiedName) {
+    String[] tokens = qualifiedName.split("\\.");
+    String formName = tokens[tokens.length - 1];
+    String appName = tokens[tokens.length - 2];
     final int lastDotPos = qualifiedName.lastIndexOf('.');
-    String packageName = qualifiedName.split("\\.")[2];
-    String formName = qualifiedName.substring(lastDotPos + 1);
     // The initial Uuid is set to zero here since (as far as we know) we can't get random numbers
     // in ode.shared.  This shouldn't actually matter since all Uuid's are random int's anyway (and
     // 0 was randomly chosen, I promise).  The TODO(user) in MockComponent.java indicates that
@@ -166,7 +144,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         "\"YaVersion\":\"" + YaVersion.YOUNG_ANDROID_VERSION + "\",\"Source\":\"Form\"," +
         "\"Properties\":{\"$Name\":\"" + formName + "\",\"$Type\":\"Form\"," +
         "\"$Version\":\"" + YaVersion.FORM_COMPONENT_VERSION + "\",\"Uuid\":\"" + 0 + "\"," +
-        "\"Title\":\"" + formName + "\",\"AppName\":\"" + packageName +"\"}}\n|#";
+        "\"Title\":\"" + formName + "\",\"AppName\":\"" + appName +"\"}}\n|#";
   }
 
   /**
@@ -254,7 +232,12 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     project.addTextFile(new TextFile(yailFileName, yailFileContents));
 
     // Create new project
-    return storageIo.createProject(userId, project, builder.build());
+    try {
+      return storageIo.createProject(userId, project, builder.build());
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 
   @Override
@@ -306,7 +289,12 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     }
 
     // Create the new project and return the new project's id.
-    return storageIo.createProject(userId, newProject, builder.build());
+    try {
+      return storageIo.createProject(userId, newProject, builder.build());
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return oldProjectId;
   }
 
   @Override

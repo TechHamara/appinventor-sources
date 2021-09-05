@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -67,6 +68,7 @@ public final class Project {
    *    main - qualified name of main form class
    *    name - application name
    *    icon - application icon
+   *    pkgName - package name
    *    versioncode - version code
    *    versionname - version name
    *    source - comma separated list of source root directories
@@ -87,6 +89,7 @@ public final class Project {
   private static final String SOURCETAG = "source";
   private static final String VCODETAG = "versioncode";
   private static final String VNAMETAG = "versionname";
+  private static final String PKGTAG = "pkgName";
   private static final String ASSETSTAG = "assets";
   private static final String BUILDTAG = "build";
   private static final String USESLOCATIONTAG = "useslocation";
@@ -153,7 +156,12 @@ public final class Project {
       e.printStackTrace();
     }
   }
-
+  public void setPkgName(String string){
+    properties.setProperty(PKGTAG,string);
+  }
+  public String getPkgName(){
+    return properties.getProperty(PKGTAG);
+  }
   /**
    * Returns the name of the main form class
    *
@@ -280,7 +288,7 @@ public final class Project {
    * @return  the minimum Android sdk
    */
   public String getMinSdk() {
-    return properties.getProperty(ANDROID_MIN_SDK_TAG, "7");
+    return properties.getProperty(ANDROID_MIN_SDK_TAG, "19");
   }
 
   /**
@@ -374,7 +382,7 @@ public final class Project {
   private void visitSourceDirectories(String root, File file) {
     if (file.isDirectory()) {
       // Recursively visit nested directories.
-      for (String child : file.list()) {
+      for (String child : Objects.requireNonNull(file.list())) {
         visitSourceDirectories(root, new File(file, child));
       }
     } else {

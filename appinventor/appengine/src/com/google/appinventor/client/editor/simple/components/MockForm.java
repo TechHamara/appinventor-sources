@@ -344,6 +344,7 @@ public final class MockForm extends MockContainer {
   private static final String PROPERTY_NAME_VCODE = "VersionCode";
   private static final String PROPERTY_NAME_VNAME = "VersionName";
   private static final String PROPERTY_NAME_ANAME = "AppName";
+  private static final String PROPERTY_NAME_APPLICATION_PACKAGE = "PkgName";
   private static final String PROPERTY_NAME_SIZING = "Sizing"; // Don't show except on screen1
   private static final String PROPERTY_NAME_TITLEVISIBLE = "TitleVisible";
   private static final String PROPERTY_NAME_SHOW_STATUS_BAR = "ShowStatusBar";
@@ -746,6 +747,7 @@ public final class MockForm extends MockContainer {
       case PROPERTY_NAME_VNAME:
       // The VersionCode property actually applies to the application and is only visible on Screen1.
       case PROPERTY_NAME_VCODE:
+      case PROPERTY_NAME_APPLICATION_PACKAGE:
       // The Sizing property actually applies to the application and is only visible on Screen1.
       case PROPERTY_NAME_SIZING:
       // The AppName property actually applies to the application and is only visible on Screen1.
@@ -878,6 +880,13 @@ public final class MockForm extends MockContainer {
       editor.getProjectEditor().changeProjectSettingsProperty(
           SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS,
           SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME, vname);
+    }
+  }
+  private void setPkgNameProperty(String pkgName) {
+    if (editor.isScreen1()) {
+      editor.getProjectEditor().changeProjectSettingsProperty(
+              SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS,
+              SettingsConstants.YOUNG_ANDROID_SETTINGS_APPLICATION_PACKAGE, pkgName);
     }
   }
 
@@ -1373,6 +1382,8 @@ public final class MockForm extends MockContainer {
       setVCodeProperty(newValue);
     } else if (propertyName.equals(PROPERTY_NAME_VNAME)) {
       setVNameProperty(newValue);
+    }else if(propertyName.equals(PROPERTY_NAME_APPLICATION_PACKAGE)){
+      setPkgNameProperty(newValue);
     } else if (propertyName.equals(PROPERTY_NAME_ANAME)) {
       setANameProperty(newValue);
     } else if (propertyName.equals(PROPERTY_NAME_SHOW_LISTS_AS_JSON)) {

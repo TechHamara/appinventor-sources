@@ -113,10 +113,11 @@ public final class Compiler {
   private static final String EXT_COMPS_DIR_NAME = "external_comps";
 
   private static final String DEFAULT_APP_NAME = "";
+  private static final String DEFAULT_PKG_NAME = "";
   private static final String DEFAULT_ICON = RUNTIME_FILES_DIR + "ya.png";
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
-  private static final String DEFAULT_MIN_SDK = "7";
+  private static final String DEFAULT_MIN_SDK = "19";
   private static final String DEFAULT_THEME = "AppTheme.Light.DarkActionBar";
 
   /*
@@ -1007,7 +1008,7 @@ public final class Compiler {
   private boolean writeAndroidManifest(File manifestFile) {
     // Create AndroidManifest.xml
     String mainClass = project.getMainClass();
-    String packageName = Signatures.getPackageName(mainClass);
+    String packageName = (project.getPkgName() == null || project.getPkgName().isEmpty()) ? Signatures.getPackageName(mainClass):project.getPkgName();
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
@@ -1016,6 +1017,7 @@ public final class Compiler {
       vName += "u";
     }
     String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : cleanName(project.getAName());
+    LOG.log(Level.INFO, "PkgName: " + project.getPkgName() +"<br>" +packageName);
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
 

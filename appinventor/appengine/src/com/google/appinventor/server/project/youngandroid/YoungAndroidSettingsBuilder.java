@@ -1,26 +1,6 @@
-// -*- mode: java; c-basic-offset: 2; -*-
-// Copyright © 2021 MIT, All rights reserved
-// Released under the Apache License, Version 2.0
-// http://www.apache.org/licenses/LICENSE-2.0
-
 package com.google.appinventor.server.project.youngandroid;
 
-import static com.google.appinventor.shared.settings.SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_ACCENT_COLOR;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_ACTIONBAR;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_APP_NAME;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_BLOCK_SUBSET;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_DEFAULTFILESCOPE;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_ICON;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR_DARK;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_SHOW_LISTS_AS_JSON;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_SIZING;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_THEME;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_TUTORIAL_URL;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE;
-import static com.google.appinventor.shared.settings.SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME;
+import static com.google.appinventor.shared.settings.SettingsConstants.*;
 import static com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer.ASSETS_FOLDER;
 import static com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer.SRC_FOLDER;
 
@@ -29,6 +9,8 @@ import com.google.common.base.Strings;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class YoungAndroidSettingsBuilder {
@@ -39,6 +21,7 @@ public class YoungAndroidSettingsBuilder {
   private String versionName = "1.0";
   private String usesLocation = "false";
   private String appName = "";
+  private String pkgName = "";
   private String sizing = "Fixed";
   private String showListsAsJson = "false";
   private String tutorialUrl = "";
@@ -77,6 +60,8 @@ public class YoungAndroidSettingsBuilder {
         YOUNG_ANDROID_SETTINGS_BLOCK_SUBSET));
     appName = Strings.nullToEmpty(settings.getSetting(PROJECT_YOUNG_ANDROID_SETTINGS,
         YOUNG_ANDROID_SETTINGS_APP_NAME));
+    pkgName = Strings.nullToEmpty(settings.getSetting(PROJECT_YOUNG_ANDROID_SETTINGS,
+            YOUNG_ANDROID_SETTINGS_APPLICATION_PACKAGE));
     actionBar = Strings.nullToEmpty(settings.getSetting(PROJECT_YOUNG_ANDROID_SETTINGS,
         YOUNG_ANDROID_SETTINGS_ACTIONBAR));
     theme = Strings.nullToEmpty(settings.getSetting(PROJECT_YOUNG_ANDROID_SETTINGS,
@@ -100,6 +85,7 @@ public class YoungAndroidSettingsBuilder {
     projectName = properties.getProperty("name", "");
     qualifiedFormName = properties.getProperty("main", "");
     appName = properties.getProperty("aname", "");
+    pkgName = Strings.nullToEmpty(properties.getProperty("pkgName",""));
     icon = properties.getProperty("icon", "");
     versionCode = properties.getProperty("versioncode", "");
     versionName = properties.getProperty("versionname", "");
@@ -148,6 +134,10 @@ public class YoungAndroidSettingsBuilder {
 
   public YoungAndroidSettingsBuilder setAppName(String appName) {
     this.appName = appName;
+    return this;
+  }
+  public YoungAndroidSettingsBuilder setPkgName(String pkgName){
+    this.pkgName = pkgName;
     return this;
   }
 
@@ -206,13 +196,14 @@ public class YoungAndroidSettingsBuilder {
    *
    * @return a JSON string containing the settings
    */
-  public String build() {
+  public String build() throws JSONException {
     JSONObject object = new JSONObject();
     object.put(YOUNG_ANDROID_SETTINGS_ICON, icon);
     object.put(YOUNG_ANDROID_SETTINGS_VERSION_CODE, versionCode);
     object.put(YOUNG_ANDROID_SETTINGS_VERSION_NAME, versionName);
     object.put(YOUNG_ANDROID_SETTINGS_USES_LOCATION, usesLocation);
     object.put(YOUNG_ANDROID_SETTINGS_APP_NAME, appName);
+    object.put(YOUNG_ANDROID_SETTINGS_APPLICATION_PACKAGE,pkgName);
     object.put(YOUNG_ANDROID_SETTINGS_SIZING, sizing);
     object.put(YOUNG_ANDROID_SETTINGS_SHOW_LISTS_AS_JSON, showListsAsJson);
     object.put(YOUNG_ANDROID_SETTINGS_TUTORIAL_URL, tutorialUrl);
@@ -242,6 +233,7 @@ public class YoungAndroidSettingsBuilder {
     result.put("source", "../" + SRC_FOLDER);
     result.put("build", "../build");
     addPropertyIfSet(result, "icon", icon);
+    addPropertyIfSet(result,"pkgName",pkgName);
     addPropertyIfSet(result, "versioncode", versionCode);
     addPropertyIfSet(result, "versionname", versionName);
     addPropertyIfSet(result, "useslocation", usesLocation);
@@ -272,7 +264,12 @@ public class YoungAndroidSettingsBuilder {
 
   @Override
   public String toString() {
-    return build();
+    try {
+      return build();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   @Override
@@ -291,6 +288,7 @@ public class YoungAndroidSettingsBuilder {
       result &= other.usesLocation.equals(usesLocation);
       result &= other.sizing.equals(sizing);
       result &= other.appName.equals(appName);
+      result &= other.pkgName.equals(pkgName);
       result &= other.showListsAsJson.equals(showListsAsJson);
       result &= other.tutorialUrl.equals(tutorialUrl);
       result &= other.blockSubset.equals(blockSubset);

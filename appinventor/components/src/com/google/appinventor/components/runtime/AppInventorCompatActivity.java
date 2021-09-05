@@ -22,13 +22,9 @@ import androidx.appcompat.app.AppCompatCallback;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.view.ActionMode.Callback;
-import com.google.appinventor.components.common.ComponentConstants;
-import com.google.appinventor.components.runtime.util.PaintUtil;
-import com.google.appinventor.components.runtime.util.SdkLevel;
-import com.google.appinventor.components.runtime.util.theme.ClassicThemeHelper;
-import com.google.appinventor.components.runtime.util.theme.HoneycombThemeHelper;
-import com.google.appinventor.components.runtime.util.theme.IceCreamSandwichThemeHelper;
-import com.google.appinventor.components.runtime.util.theme.ThemeHelper;
+import com.google.appinventor.components.common.*;
+import com.google.appinventor.components.runtime.util.theme.*;
+import com.google.appinventor.components.runtime.util.*;
 
 /**
  * AppInventorCompatActivity provides a base implementation of Activity that handles the styling of

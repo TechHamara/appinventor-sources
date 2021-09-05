@@ -87,6 +87,7 @@ public class ComponentConstants {
    */
   public static final String DEFAULT_THEME = "Classic";
   public static final String DEFAULT_PRIMARY_COLOR = "&HFF3F51B5";
+
   public static final String DEFAULT_PRIMARY_DARK_COLOR = "&HFF303F9F";
   public static final String DEFAULT_ACCENT_COLOR = "&HFFFF4081";
 
